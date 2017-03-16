@@ -291,5 +291,6 @@ Intermediate/
 Packaged/
 Plugins/
 Saved/
+Content/Local/
 
 *.dll

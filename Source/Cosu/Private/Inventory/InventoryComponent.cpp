@@ -51,7 +51,7 @@ void UInventoryComponent::DropItem(int32 Index)
 		return;
 	}
 
-	const auto& Item = Items[Index];
+	const auto Item = Items[Index];
 
 	auto OwnerActor = GetOwner();
 	if (!OwnerActor)
@@ -86,14 +86,29 @@ void UInventoryComponent::AddItemLow(AInventoryItem* NewItem)
 		return;
 	}
 
+	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5.f, FColor::Black, FString::Printf(TEXT("%s added to some inventory."), *NewItem->GetDisplayName().ToString()));
+
 	Items.Add(NewItem);
 	NewItem->Inventory = this;
 	OnInventoryUpdated.Broadcast();
 }
 
+void UInventoryComponent::AddToItemCountLow(AInventoryItem* Item, int32 Count)
+{
+	if (!Item || Items.Find(Item) < 0 || !Item->IsStackable())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent::AddToItemCountLow: Attempted to add to an incorrrect item."));
+		return;
+	}
+
+	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5.f, FColor::Black, FString::Printf(TEXT("%s added to some inventory."), *Item->GetDisplayName().ToString()));
+
+	Item->Count += Count;
+	OnInventoryUpdated.Broadcast();
+}
+
 void UInventoryComponent::AddItem(AInventoryItem* NewItem)
 {
-	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5.f, FColor::Black, FString::Printf(TEXT("%s added to some inventory."), *NewItem->GetDisplayName().ToString()));
 
 	if (NewItem->IsStackable())
 	{
@@ -102,9 +117,8 @@ void UInventoryComponent::AddItem(AInventoryItem* NewItem)
 		{
 			if (Item->GetClass() == ItemClass && Item->IsStackable())
 			{
-				Item->Count += NewItem->Count;
+				AddToItemCountLow(Item, NewItem->Count);
 				NewItem->Destroy();
-				OnInventoryUpdated.Broadcast();
 				return;
 			}
 		}
@@ -119,7 +133,7 @@ void UInventoryComponent::AddItemByClass(TSubclassOf<AInventoryItem> NewItemClas
 	const auto Item = FindItem(NewItemClass, true);
 	if (Item)
 	{
-		++Item->Count;
+		AddToItemCountLow(Item, 1);
 		UE_LOG(LogTemp, Log, TEXT("UInventoryComponent::AddItemByClass: Added an item without spawning."));
 	}
 	else
@@ -175,7 +189,7 @@ int32 UInventoryComponent::RemoveItemByClass(TSubclassOf<AInventoryItem> ItemCla
 		{
 			if (Count - DeletedCount < Item->Count)
 			{
-				Item->Count -= Count - DeletedCount;
+				AddToItemCountLow(Item, DeletedCount - Count);
 				DeletedCount = Count;
 				break;
 			}
@@ -232,7 +246,7 @@ bool UInventoryComponent::RemoveItemAt(int32 Index, int32 Count, bool bDestroy)
 	}
 	else
 	{
-		Items[Index]->Count -= Count;
+		AddToItemCountLow(Items[Index], -Count);
 	}
 	OnInventoryUpdated.Broadcast();
 	return true;

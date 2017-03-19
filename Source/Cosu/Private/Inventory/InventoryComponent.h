@@ -61,4 +61,7 @@ public:
 	
 private:
 	void AddItemLow(AInventoryItem* NewItem);
+
+	// Adds as much as possible to the existing item, than adds a copy of the item if needed
+	void AddToItemCountLow(AInventoryItem* Item, int32 count);
 };

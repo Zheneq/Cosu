@@ -78,6 +78,19 @@ void UInventoryComponent::DropItem(int32 Index)
 	}
 }
 
+void UInventoryComponent::AddItemLow(AInventoryItem* NewItem)
+{
+	if (!NewItem)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent::AddItemLow: Attempted to add a nullptr."));
+		return;
+	}
+
+	Items.Add(NewItem);
+	NewItem->Inventory = this;
+	OnInventoryUpdated.Broadcast();
+}
+
 void UInventoryComponent::AddItem(AInventoryItem* NewItem)
 {
 	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5.f, FColor::Black, FString::Printf(TEXT("%s added to some inventory."), *NewItem->GetDisplayName().ToString()));
@@ -97,9 +110,33 @@ void UInventoryComponent::AddItem(AInventoryItem* NewItem)
 		}
 	}
 
-	Items.Add(NewItem);
-	NewItem->Inventory = this;
-	OnInventoryUpdated.Broadcast();
+	AddItemLow(NewItem);
+}
+
+void UInventoryComponent::AddItemByClass(TSubclassOf<AInventoryItem> NewItemClass)
+{
+	// TODO: Check if NewItemClass is stackable by default?
+	const auto Item = FindItem(NewItemClass, true);
+	if (Item)
+	{
+		++Item->Count;
+		UE_LOG(LogTemp, Log, TEXT("UInventoryComponent::AddItemByClass: Added an item without spawning."));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("UInventoryComponent::AddItemByClass: Spawning new item."));
+		auto World = GetWorld();
+		if (World)
+		{
+			AInventoryItem* NewItem = World->SpawnActor<AInventoryItem>(NewItemClass, FTransform());
+			AddItemLow(NewItem);
+		}
+	}
+}
+
+void UInventoryComponent::AddItemByClassWStats(TSubclassOf<AInventoryItem> NewItemClass, TArray<FInventoryItemStat> Stats)
+{
+	// TODO
 }
 
 bool UInventoryComponent::HasItem(TSubclassOf<AInventoryItem> ItemClass, int32 Count) const
@@ -113,6 +150,18 @@ bool UInventoryComponent::HasItem(TSubclassOf<AInventoryItem> ItemClass, int32 C
 		}
 	}
 	return false;
+}
+
+AInventoryItem* UInventoryComponent::FindItem(TSubclassOf<AInventoryItem> ItemClass, bool bOnlyStackable) const
+{
+	for (const auto& Item : Items)
+	{
+		if (Item->GetClass()->IsChildOf(ItemClass) && (!bOnlyStackable || Item->IsStackable()))
+		{
+			return Item;
+		}
+	}
+	return nullptr;
 }
 
 int32 UInventoryComponent::RemoveItemByClass(TSubclassOf<AInventoryItem> ItemClass, int32 Count, bool bDestroy)

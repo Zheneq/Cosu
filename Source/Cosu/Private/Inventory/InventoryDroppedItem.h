@@ -13,17 +13,18 @@ class AInventoryDroppedItem : public AActor
 	GENERATED_BODY()
 
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		UInventoryComponent* InventoryComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		UStaticMeshComponent* StaticMeshComponent;
 
 public:	
 	// Sets default values for this actor's properties
 	AInventoryDroppedItem();
 
-	UInventoryComponent* GetInventoryComponent() const { return InventoryComponent; }
+	UInventoryComponent* GetInventoryComponent() const;
+	UStaticMeshComponent* GetStaticMeshComponent() const;
 
 protected:
 	// Called when the game starts or when spawned
@@ -34,3 +35,6 @@ public:
 	//virtual void Tick(float DeltaTime) override;
 
 };
+
+FORCEINLINE UInventoryComponent* AInventoryDroppedItem::GetInventoryComponent() const { return InventoryComponent; }
+FORCEINLINE UStaticMeshComponent* AInventoryDroppedItem::GetStaticMeshComponent() const { return StaticMeshComponent; }

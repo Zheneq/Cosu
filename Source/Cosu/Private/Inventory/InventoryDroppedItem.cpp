@@ -25,12 +25,3 @@ AInventoryDroppedItem::AInventoryDroppedItem()
 
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
 }
-
-void AInventoryDroppedItem::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(AInventoryDroppedItem, InventoryComponent);
-	DOREPLIFETIME(AInventoryDroppedItem, StaticMeshComponent);
-
-}

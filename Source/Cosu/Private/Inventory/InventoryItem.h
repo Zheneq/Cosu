@@ -37,25 +37,25 @@ public:
 		class UInventoryComponent* Inventory;
 
 	// Basic name of the item
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Cosu Inventory")
+	UPROPERTY(EditDefaultsOnly, Replicated, Category = "Cosu Inventory")
 		FText DisplayName;
 
 	// Picture to show in inventory
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Cosu Inventory")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category = "Cosu Inventory")
 		UTexture2D* DisplayPicture;
-
-	// Actor to be spawned when the item is dropped
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Cosu Inventory")
-		TSubclassOf<AActor> ItemClass;
 
 	// True if item can be stackable
 	// If Stats array is not empty, this will be ignored
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Cosu Inventory")
+	UPROPERTY(EditDefaultsOnly, Replicated, Category = "Cosu Inventory")
 		bool bStackable;
 
 	// Number of items in the stack
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Cosu Inventory")
+	UPROPERTY(BlueprintReadWrite, Replicated, Category = "Cosu Inventory")
 		int32 Count;
+
+	// Max number of items in a stack (0 if unlimited)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Cosu Inventory")
+		int32 MaxCount;
 
 	// Unique stats of the item
 	// If the array is not empty, the item is unstackable
@@ -63,7 +63,7 @@ public:
 		TArray<FInventoryItemStat> Stats;
 
 	// If true, player will be unable move it out of any inventory
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Cosu Inventory")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category = "Cosu Inventory")
 		bool bNotDroppable;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Cosu Inventory")

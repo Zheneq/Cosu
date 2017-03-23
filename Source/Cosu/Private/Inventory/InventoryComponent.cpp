@@ -127,13 +127,13 @@ void UInventoryComponent::AddItem(AInventoryItem* NewItem)
 	AddItemLow(NewItem);
 }
 
-void UInventoryComponent::AddItemByClass(TSubclassOf<AInventoryItem> NewItemClass)
+void UInventoryComponent::AddItemByClass(TSubclassOf<AInventoryItem> NewItemClass, int32 Count)
 {
 	// TODO: Check if NewItemClass is stackable by default?
 	const auto Item = FindItem(NewItemClass, true);
 	if (Item)
 	{
-		AddToItemCountLow(Item, 1);
+		AddToItemCountLow(Item, Count);
 		UE_LOG(LogTemp, Log, TEXT("UInventoryComponent::AddItemByClass: Added an item without spawning."));
 	}
 	else
@@ -143,12 +143,13 @@ void UInventoryComponent::AddItemByClass(TSubclassOf<AInventoryItem> NewItemClas
 		if (World)
 		{
 			AInventoryItem* NewItem = World->SpawnActor<AInventoryItem>(NewItemClass, FTransform());
+			NewItem->Count = Count;
 			AddItemLow(NewItem);
 		}
 	}
 }
 
-void UInventoryComponent::AddItemByClassWStats(TSubclassOf<AInventoryItem> NewItemClass, TArray<FInventoryItemStat> Stats)
+void UInventoryComponent::AddItemByClassWStats(TSubclassOf<AInventoryItem> NewItemClass, TArray<FInventoryItemStat> Stats, int32 Count)
 {
 	// TODO
 }

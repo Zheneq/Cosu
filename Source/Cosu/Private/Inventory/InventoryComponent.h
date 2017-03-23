@@ -35,10 +35,10 @@ public:
 		virtual void AddItem(AInventoryItem* NewItem);
 
 	UFUNCTION(BlueprintCallable, Category = "Cosu Inventory")
-		virtual void AddItemByClass(TSubclassOf<AInventoryItem> NewItemClass);
+		virtual void AddItemByClass(TSubclassOf<AInventoryItem> NewItemClass, int32 Count = 1);
 
 	UFUNCTION(BlueprintCallable, Category = "Cosu Inventory")
-		virtual void AddItemByClassWStats(TSubclassOf<AInventoryItem> NewItemClass, TArray<FInventoryItemStat> Stats);
+		virtual void AddItemByClassWStats(TSubclassOf<AInventoryItem> NewItemClass, TArray<FInventoryItemStat> Stats, int32 Count = 1);
 
 	UFUNCTION(BlueprintCallable, Category = "Cosu Inventory")
 		virtual bool HasItem(TSubclassOf<AInventoryItem> ItemClass, int32 Count = 1) const;

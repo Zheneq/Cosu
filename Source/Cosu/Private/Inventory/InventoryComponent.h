@@ -38,7 +38,7 @@ public:
 		virtual void AddItemByClass(TSubclassOf<AInventoryItem> NewItemClass, int32 Count = 1);
 
 	UFUNCTION(BlueprintCallable, Category = "Cosu Inventory")
-		virtual void AddItemByClassWStats(TSubclassOf<AInventoryItem> NewItemClass, TArray<FInventoryItemStat> Stats, int32 Count = 1);
+		virtual void AddItemByClassWStats(TSubclassOf<AInventoryItem> NewItemClass, const TArray<FInventoryItemStat>& Stats, int32 Count = 1);
 
 	UFUNCTION(BlueprintCallable, Category = "Cosu Inventory")
 		virtual bool HasItem(TSubclassOf<AInventoryItem> ItemClass, int32 Count = 1) const;
@@ -64,4 +64,13 @@ private:
 
 	// Adds as much as possible to the existing item, than adds a copy of the item if needed
 	void AddToItemCountLow(AInventoryItem* Item, int32 count);
+
+
+	// Spawns a new item and adds it into the inventory
+	AInventoryItem* SpawnNewItemLow(TSubclassOf<AInventoryItem> NewItemClass, int32 Count, const TArray<FInventoryItemStat>* Stats = nullptr);
+
+	// Compresses the stacks of given class (if stackable)
+	// Fixes overfull ones
+	// Does not call OnInventoryUpdated!
+	void NormalizeLow(TSubclassOf<AInventoryItem> Class);
 };

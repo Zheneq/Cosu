@@ -15,6 +15,7 @@ AInventoryItem::AInventoryItem()
 
 	bStackable = true;
 	Count = 1;
+	MaxCount = 0;
 	bNotDroppable = false;
 	bHidden = false;
 }
@@ -24,7 +25,6 @@ void AInventoryItem::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutL
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(AInventoryItem, ItemClass);
 	DOREPLIFETIME(AInventoryItem, bStackable);
 	DOREPLIFETIME(AInventoryItem, Count);
 	DOREPLIFETIME(AInventoryItem, Stats);

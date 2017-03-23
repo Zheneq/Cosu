@@ -4,6 +4,7 @@
 #include "Net/UnrealNetwork.h"
 #include "InventoryItem.h"
 #include "InventoryDroppedItem.h"
+#include "InventoryItemInterface.h"
 #include "InventoryComponent.h"
 
 
@@ -80,9 +81,9 @@ void UInventoryComponent::DropItem(int32 Index)
 
 void UInventoryComponent::AddItemLow(AInventoryItem* NewItem)
 {
-	if (!NewItem)
+	if (!IsValid(NewItem))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent::AddItemLow: Attempted to add a nullptr."));
+		UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent::AddItemLow: Attempted to add an invalid item."));
 		return;
 	}
 
@@ -95,20 +96,93 @@ void UInventoryComponent::AddItemLow(AInventoryItem* NewItem)
 
 void UInventoryComponent::AddToItemCountLow(AInventoryItem* Item, int32 Count)
 {
-	if (!Item || Items.Find(Item) < 0 || !Item->IsStackable())
+	if (!Item || !Count || Items.Find(Item) < 0 || !Item->IsStackable())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent::AddToItemCountLow: Attempted to add to an incorrrect item."));
+		UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent::AddToItemCountLow: Incorrect parameter."));
 		return;
 	}
 
 	GEngine->AddOnScreenDebugMessage(INDEX_NONE, 5.f, FColor::Black, FString::Printf(TEXT("%s added to some inventory."), *Item->GetDisplayName().ToString()));
 
 	Item->Count += Count;
+	NormalizeLow(Item->GetClass());
 	OnInventoryUpdated.Broadcast();
+}
+
+void UInventoryComponent::NormalizeLow(TSubclassOf<AInventoryItem> Class)
+{
+	auto Filter = Items.FilterByPredicate([&Class](const AInventoryItem* Item) {
+		return Item->IsStackable() && Item->GetClass() == Class;
+	});
+
+	if (!Filter.Num()) return;
+
+	int32 totalCount = 0;
+	for (const auto& Item : Filter) totalCount += Item->Count;
+
+	for (const auto& Item : Filter)
+	{
+		// if we're out of items, remove the uneeded stacks
+		if (totalCount <= 0)
+		{
+			Items.Remove(Item);
+			continue;
+		}
+
+		// add as much to a stack as we can
+		if (!Item->MaxCount)
+		{
+			Item->Count = totalCount;
+		}
+		else
+		{
+			if (totalCount > Item->MaxCount)
+			{
+				Item->Count = Item->MaxCount;
+			}
+			else
+			{
+				Item->Count = totalCount;
+			}
+		}
+		totalCount -= Item->Count;
+	}
+	const auto CDO = Cast<AInventoryItem>(Class->GetDefaultObject());
+	while (totalCount > 0)
+	{
+		const auto NewItem = SpawnNewItemLow(Class, totalCount > CDO->MaxCount ? CDO->MaxCount: totalCount);
+		totalCount -= NewItem->Count;
+	}
+}
+
+AInventoryItem* UInventoryComponent::SpawnNewItemLow(TSubclassOf<AInventoryItem> NewItemClass, int32 Count, const TArray<FInventoryItemStat>* Stats)
+{
+	if (Count <= 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent::SpawnNewItemLow: Attempted to spawn zero items or less."));
+		return nullptr;
+	}
+
+	UE_LOG(LogTemp, Log, TEXT("UInventoryComponent::SpawnNewItemLow: Spawning new item."));
+	auto World = GetWorld();
+	if (World)
+	{
+		AInventoryItem* NewItem = World->SpawnActor<AInventoryItem>(NewItemClass);
+		NewItem->Count = Count;
+		if (Stats) NewItem->Stats = *Stats;
+		AddItemLow(NewItem);
+		return NewItem;
+	}
+	return nullptr;
 }
 
 void UInventoryComponent::AddItem(AInventoryItem* NewItem)
 {
+	if (!IsValid(NewItem))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent::AddItem: Attempted to add an invalid item."));
+		return;
+	}
 
 	if (NewItem->IsStackable())
 	{
@@ -129,6 +203,11 @@ void UInventoryComponent::AddItem(AInventoryItem* NewItem)
 
 void UInventoryComponent::AddItemByClass(TSubclassOf<AInventoryItem> NewItemClass, int32 Count)
 {
+	if (Count <= 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent::AddItemByClass: Attempted to add zero items or less."));
+		return;
+	}
 	// TODO: Check if NewItemClass is stackable by default?
 	const auto Item = FindItem(NewItemClass, true);
 	if (Item)
@@ -139,23 +218,20 @@ void UInventoryComponent::AddItemByClass(TSubclassOf<AInventoryItem> NewItemClas
 	else
 	{
 		UE_LOG(LogTemp, Log, TEXT("UInventoryComponent::AddItemByClass: Spawning new item."));
-		auto World = GetWorld();
-		if (World)
-		{
-			AInventoryItem* NewItem = World->SpawnActor<AInventoryItem>(NewItemClass, FTransform());
-			NewItem->Count = Count;
-			AddItemLow(NewItem);
-		}
+		SpawnNewItemLow(NewItemClass, Count);
 	}
 }
 
-void UInventoryComponent::AddItemByClassWStats(TSubclassOf<AInventoryItem> NewItemClass, TArray<FInventoryItemStat> Stats, int32 Count)
+void UInventoryComponent::AddItemByClassWStats(TSubclassOf<AInventoryItem> NewItemClass, const TArray<FInventoryItemStat>& Stats, int32 Count)
 {
-	// TODO
+	UE_LOG(LogTemp, Log, TEXT("UInventoryComponent::AddItemByClassWStats: Spawning new item."));
+	SpawnNewItemLow(NewItemClass, Count, &Stats);
 }
 
 bool UInventoryComponent::HasItem(TSubclassOf<AInventoryItem> ItemClass, int32 Count) const
 {
+	if (Count <= 0) return true;
+
 	for (const auto& Item : Items)
 	{
 		if (Item->GetClass()->IsChildOf(ItemClass))
@@ -181,6 +257,8 @@ AInventoryItem* UInventoryComponent::FindItem(TSubclassOf<AInventoryItem> ItemCl
 
 int32 UInventoryComponent::RemoveItemByClass(TSubclassOf<AInventoryItem> ItemClass, int32 Count, bool bDestroy)
 {
+	if (Count <= 0) return 0;
+
 	TArray<AInventoryItem*> ItemsToRemove;
 	int32 DeletedCount = 0;
 
@@ -225,7 +303,7 @@ bool UInventoryComponent::RemoveItem(AInventoryItem* Item, int32 Count, bool bDe
 
 bool UInventoryComponent::RemoveItemAt(int32 Index, int32 Count, bool bDestroy)
 {
-	if (!Items.IsValidIndex(Index))
+	if (!Items.IsValidIndex(Index) || Count < 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent::RemoveItemAt: Attempted to remove item that does not exist."));
 		return false;

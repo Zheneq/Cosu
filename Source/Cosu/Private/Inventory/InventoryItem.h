@@ -63,7 +63,7 @@ public:
 		TArray<FInventoryItemStat> Stats;
 
 	// If true, player will be unable move it out of any inventory
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category = "Cosu Inventory")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Replicated, Category = "Cosu Inventory")
 		bool bNotDroppable;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Cosu Inventory")

@@ -14,9 +14,12 @@ class COSU_API IInteractInterface
 
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Cosu")
-		bool BeginInteraction(bool& outBLatent, ACharacter* Character);
+		bool RequestInteraction(float& outDuration, ACharacter* Character);
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Cosu")
-		void EndInteraction(ACharacter* Character);
+		void InteractionSuccess(ACharacter* Character);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Cosu")
+		void InteractionFailure(ACharacter* Character);
 
 };

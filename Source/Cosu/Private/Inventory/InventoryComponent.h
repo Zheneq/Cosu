@@ -73,4 +73,7 @@ private:
 	// Fixes overfull ones
 	// Does not call OnInventoryUpdated!
 	void NormalizeLow(TSubclassOf<AInventoryItem> Class);
+
+	// Checks if the item is valid
+	bool CheckItemLow(AInventoryItem* Item);
 };

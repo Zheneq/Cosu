@@ -81,7 +81,7 @@ void UInventoryComponent::DropItem(int32 Index)
 
 void UInventoryComponent::AddItemLow(AInventoryItem* NewItem)
 {
-	if (!IsValid(NewItem))
+	if (!CheckItemLow(NewItem))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent::AddItemLow: Attempted to add an invalid item."));
 		return;
@@ -107,6 +107,11 @@ void UInventoryComponent::AddToItemCountLow(AInventoryItem* Item, int32 Count)
 	Item->Count += Count;
 	NormalizeLow(Item->GetClass());
 	OnInventoryUpdated.Broadcast();
+}
+
+bool UInventoryComponent::CheckItemLow(AInventoryItem* Item)
+{
+	return IsValid(Item) && Item->Count > 0;
 }
 
 void UInventoryComponent::NormalizeLow(TSubclassOf<AInventoryItem> Class)
@@ -178,7 +183,7 @@ AInventoryItem* UInventoryComponent::SpawnNewItemLow(TSubclassOf<AInventoryItem>
 
 void UInventoryComponent::AddItem(AInventoryItem* NewItem)
 {
-	if (!IsValid(NewItem))
+	if (!CheckItemLow(NewItem))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent::AddItem: Attempted to add an invalid item."));
 		return;

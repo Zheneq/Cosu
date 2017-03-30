@@ -65,6 +65,12 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Camera")
 		void OnCameraSwitched();
 
+	UFUNCTION(BlueprintCallable, Category = "Cosu")
+		bool GetAimedActor(FHitResult& outHit);
+
+	UPROPERTY(EditDefaultsOnly, Category = "Cosu")
+		float InteractionDistance;
+
 private:
 	float DesiredCameraAlpha;
 	float CurrentCameraAlpha;

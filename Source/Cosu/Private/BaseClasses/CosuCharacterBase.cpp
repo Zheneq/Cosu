@@ -60,6 +60,8 @@ ACosuCharacterBase::ACosuCharacterBase()
 	CameraStep = 1.f / CameraZoomStepCount;
 	bTickCameraAlpha = true;
 	bIsInThirdPersonView = false;
+
+	InteractionDistance = 150.f;
 }
 
 // Called when the game starts or when spawned
@@ -162,4 +164,37 @@ void ACosuCharacterBase::UpdateCameraView(bool bInitial)
 		OnCameraSwitched();
 		// UE_LOG(LogTemp, Log, TEXT("ACosuCharacterBase::UpdateCameraView: 3P view"));
 	}
+}
+
+bool ACosuCharacterBase::GetAimedActor(FHitResult& outHit)
+{
+	auto World = GetWorld();
+	auto PC = Cast<APlayerController>(GetController());
+	auto Capsule = GetCapsuleComponent();
+	if (!World || !PC || !PC->PlayerCameraManager || !Capsule)
+	{
+		return false;
+	}
+
+	FVector Start;
+	FRotator Rot;
+	PC->PlayerCameraManager->GetCameraViewPoint(Start, Rot);
+	const FVector End = Start + Rot.Vector() * InteractionDistance * 5.f;
+
+	FCollisionQueryParams TraceParams(NAME_None, false, this);
+
+	bool res = World->LineTraceSingleByObjectType(outHit, Start, End, FCollisionObjectQueryParams(), TraceParams);
+
+	if (res)
+	{
+		FVector Vector = outHit.Location - GetActorLocation();
+		if (FMath::Abs(Vector.Z) < Capsule->GetScaledCapsuleHalfHeight()) Vector.Z = 0.f;
+		res = Vector.Size() <= InteractionDistance;
+	}
+
+	DrawDebugLine(World, Start, End, FColor::Red, false, .1f);
+	if (res)
+		DrawDebugPoint(World, outHit.Location, 25.f, FColor::Green, false, .1f);
+
+	return res;
 }

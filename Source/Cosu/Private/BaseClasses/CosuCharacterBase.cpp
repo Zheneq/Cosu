@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Cosu.h"
+#include "CosuPlayerControllerBase.h"
 #include "CosuCharacterBase.h"
 
 
@@ -169,32 +170,25 @@ void ACosuCharacterBase::UpdateCameraView(bool bInitial)
 bool ACosuCharacterBase::GetAimedActor(FHitResult& outHit)
 {
 	auto World = GetWorld();
-	auto PC = Cast<APlayerController>(GetController());
+	auto PC = Cast<ACosuPlayerControllerBase>(GetController());
 	auto Capsule = GetCapsuleComponent();
-	if (!World || !PC || !PC->PlayerCameraManager || !Capsule)
+	if (!World || !PC || !Capsule)
 	{
 		return false;
 	}
 
-	FVector Start;
-	FRotator Rot;
-	PC->PlayerCameraManager->GetCameraViewPoint(Start, Rot);
-	const FVector End = Start + Rot.Vector() * InteractionDistance * 5.f;
-
-	FCollisionQueryParams TraceParams(NAME_None, false, this);
-
-	bool res = World->LineTraceSingleByObjectType(outHit, Start, End, FCollisionObjectQueryParams(), TraceParams);
+	bool res = PC->TraceView(outHit, InteractionDistance * 5.f, FCollisionObjectQueryParams::InitType::AllDynamicObjects);
 
 	if (res)
 	{
 		FVector Vector = outHit.Location - GetActorLocation();
 		if (FMath::Abs(Vector.Z) < Capsule->GetScaledCapsuleHalfHeight()) Vector.Z = 0.f;
 		res = Vector.Size() <= InteractionDistance;
+
+		// DrawDebugLine(World, outHit.Location, GetActorLocation(), res ? FColor::Green : FColor::Red, false, .1f);
 	}
 
-	DrawDebugLine(World, Start, End, FColor::Red, false, .1f);
-	if (res)
-		DrawDebugPoint(World, outHit.Location, 25.f, FColor::Green, false, .1f);
+	// GEngine->AddOnScreenDebugMessage(INDEX_NONE, .1f, FColor::Black, FString::Printf(TEXT("Trace: %s."), res ? *outHit.Actor->GetName() : TEXT("None")));
 
 	return res;
 }

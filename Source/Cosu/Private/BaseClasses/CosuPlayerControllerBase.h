@@ -19,7 +19,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Cosu")
 		bool GetAimedActor(FHitResult& outHit);
-	
-	UPROPERTY(EditDefaultsOnly, Category = "Cosu")
-		float InteractionDistance;
+
+	bool TraceView(FHitResult& outHit, float TraceDistance, enum FCollisionObjectQueryParams::InitType QueryType);
 };

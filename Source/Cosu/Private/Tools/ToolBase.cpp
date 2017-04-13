@@ -26,3 +26,9 @@ void AToolBase::Tick(float DeltaTime)
 
 }
 
+void AToolBase::Use()
+{
+	Use_BP();
+
+}
+

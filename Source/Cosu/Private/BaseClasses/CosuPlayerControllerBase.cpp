@@ -32,9 +32,9 @@ bool ACosuPlayerControllerBase::TraceView(FHitResult& outHit, float TraceDistanc
 	bool res = World->LineTraceSingleByObjectType(outHit, Start, End, FCollisionObjectQueryParams(QueryType), TraceParams);
 
 
-	// DrawDebugLine(World, Start, End, FColor::Red, false, .1f);
-	// if (res)
-	//	DrawDebugPoint(World, outHit.Location, 25.f, FColor::Green, false, .1f);
+	DrawDebugLine(World, Start, End, FColor::Red, false, .1f);
+	if (res)
+		DrawDebugPoint(World, outHit.Location, 25.f, FColor::Green, false, .1f);
 
 	return res;
 }

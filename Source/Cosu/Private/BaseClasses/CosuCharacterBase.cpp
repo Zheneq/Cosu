@@ -185,7 +185,7 @@ bool ACosuCharacterBase::GetAimedActor(FHitResult& outHit)
 		if (FMath::Abs(Vector.Z) < Capsule->GetScaledCapsuleHalfHeight()) Vector.Z = 0.f;
 		res = Vector.Size() <= InteractionDistance;
 
-		// DrawDebugLine(World, outHit.Location, GetActorLocation(), res ? FColor::Green : FColor::Red, false, .1f);
+		DrawDebugLine(World, outHit.Location, GetActorLocation(), res ? FColor::Green : FColor::Red, false, .1f);
 	}
 
 	// GEngine->AddOnScreenDebugMessage(INDEX_NONE, .1f, FColor::Black, FString::Printf(TEXT("Trace: %s."), res ? *outHit.Actor->GetName() : TEXT("None")));

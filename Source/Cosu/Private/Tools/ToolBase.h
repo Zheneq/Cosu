@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
+#include "Private/BaseClasses/CosuCharacterBase.h"
 #include "ToolBase.generated.h"
 
 UCLASS()
@@ -22,6 +23,10 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	
+	UPROPERTY(BlueprintReadWrite, Category = "Cosu")
+		ACosuCharacterBase *Holder;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Cosu Inventory")
+		void Use();
 	
 };

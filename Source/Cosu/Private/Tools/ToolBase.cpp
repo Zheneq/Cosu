@@ -26,3 +26,8 @@ void AToolBase::Tick(float DeltaTime)
 
 }
 
+void AToolBase::Use_Implementation()
+{
+
+}
+

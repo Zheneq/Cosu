@@ -20,5 +20,5 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Cosu")
 		bool GetAimedActor(FHitResult& outHit);
 
-	bool TraceView(FHitResult& outHit, float TraceDistance, enum FCollisionObjectQueryParams::InitType QueryType);
+	bool TraceView(FHitResult& outHit, float TraceDistance, enum FCollisionObjectQueryParams::InitType QueryType = FCollisionObjectQueryParams::InitType::AllObjects);
 };

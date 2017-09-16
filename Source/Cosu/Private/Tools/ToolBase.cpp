@@ -26,9 +26,8 @@ void AToolBase::Tick(float DeltaTime)
 
 }
 
-void AToolBase::Use()
+void AToolBase::Use_Implementation()
 {
-	Use_BP();
 
 }
 

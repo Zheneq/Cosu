@@ -5,7 +5,7 @@
 #include "UObject/NoExportTypes.h"
 #include "InventoryItem.generated.h"
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FInventoryItemStat
 {
 	GENERATED_BODY()

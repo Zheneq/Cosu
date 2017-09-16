@@ -4,8 +4,8 @@ using UnrealBuildTool;
 
 public class Cosu : ModuleRules
 {
-	public Cosu(TargetInfo Target)
-	{
+	public Cosu(ReadOnlyTargetRules Target) : base(Target)
+    {
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "Landscape" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

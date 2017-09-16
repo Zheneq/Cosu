@@ -5,21 +5,9 @@ using System.Collections.Generic;
 
 public class CosuTarget : TargetRules
 {
-	public CosuTarget(TargetInfo Target)
-	{
+	public CosuTarget(TargetInfo Target) : base(Target)
+    {
 		Type = TargetType.Game;
-	}
-
-	//
-	// TargetRules interface.
-	//
-
-	public override void SetupBinaries(
-		TargetInfo Target,
-		ref List<UEBuildBinaryConfiguration> OutBuildBinaryConfigurations,
-		ref List<string> OutExtraModuleNames
-		)
-	{
-		OutExtraModuleNames.AddRange( new string[] { "Cosu" } );
-	}
+        ExtraModuleNames.AddRange(new string[] { "Cosu" });
+    }
 }
